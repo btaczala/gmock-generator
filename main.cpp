@@ -31,7 +31,7 @@ int main(int argc, char* argv[]) {
             GMOCKGenerator gen{inputFile};
 
             auto file = gen.parse();
-            MockWriter mw { file };
+            MockWriter mw{file};
 
             std::cout << "\n\n\n" << mw.render() << std::endl;
         }

@@ -1,32 +1,59 @@
 #include "MockWriter.hpp"
 
 #include <fmt/format.h>
+#include <fmt/ostream.h>
 #include <mstch/mstch.hpp>
 
 namespace {
+const auto kClassFormat =
+    R"(#ifdef {class_name}__MOCK_HPP
+#define {class_name}__MOCK_HPP
 
-struct FileWriter : public mstch::object {
-    FileWriter(const CXXFile& file) : _file(file) {
-        register_methods(this, {{"classes", &FileWriter::classes},
-                                {"class_name", &FileWriter::className}});
-    }
+#include <gmock/gmock.h>
 
-    mstch::node className() { return std::string{"c1"}; }
+class {class_name} {{ 
+  public:
+{class_constructors}
+{class_methods} 
+}};
 
-    mstch::node classes() {
-        mstch::array a{std::string{"test"}};
-        return a;
-    }
-
-   private:
-    CXXFile _file;
-};
+#endif // {class_name}__MOCK_HPP
+)";
 }  // namespace
 
-std::string MockWriter::render() {
-    std::stringstream ss;
-    std::string view{"{{#classes}}<b>{{class_name}}</b>: {{.}}\n{{/classes}}"};
-    const auto context = std::make_shared<FileWriter>(_file);
+std::ostream& operator<<(std::ostream& os, const std::vector<Arg>& args) {
+    std::for_each(args.begin(), args.end() - 1,
+                  [&os](const auto& arg) { os << arg._type << ", "; });
 
-    return mstch::render(view, context);
+    os << args.back()._type;
+    return os;
+}
+
+std::string MockWriter::render() {
+    auto classCtorsFormatter = [](const Class& cl) -> std::string {
+        std::string buff;
+
+        for (auto& ctor : cl._ctors) {
+            buff += fmt::format("    {}Mock({}) : {}() {{}}\n", cl._name,
+                                ctor._arguments, cl._name);
+        }
+        return buff;
+    };
+    auto classImplFormatter = [](const Class& cl) -> std::string {
+        std::string buff;
+        for (const auto& m : cl._methods) {
+            buff += fmt::format("    MOCK_METHOD{}({});\n", m._arguments.size(),
+                                m._returnType);
+        }
+        return buff;
+    };
+
+    std::string buff;
+    for (const auto& _class : _file._classes) {
+        buff += fmt::format(
+            kClassFormat, fmt::arg("class_name", _class._name + "Mock"),
+            fmt::arg("class_constructors", classCtorsFormatter(_class)),
+            fmt::arg("class_methods", classImplFormatter(_class)));
+    }
+    return buff;
 }

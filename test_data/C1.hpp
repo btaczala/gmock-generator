@@ -1,20 +1,20 @@
 #ifndef C1_HPP
 #define C1_HPP
 
+#include <string>
+
 namespace n1 {
 
-class C1
-{
-public:
+class C1 {
+   public:
     explicit C1(int);
-    virtual ~C1() { }
+    virtual ~C1() {}
 
     void f0();
     virtual void f1();
-    virtual void f2(int) { }
+    virtual void f2(int, std::string) {}
 };
 
-} // namespace n1
+}  // namespace n1
 
 #endif
-

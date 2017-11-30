@@ -10,6 +10,13 @@ find_package(LibClang REQUIRED)
 
 add_subdirectory(3rdParty)
 
-add_executable(gmock-generator main.cpp generator.cpp MockWriter.cpp)
+add_library(gg-core generator.cpp MockWriter.cpp)
+target_include_directories(gg-core PUBLIC ${CLANG_INCLUDE_DIRS} ${LLVM_INCLUDE_DIR} ${mstch_INCLUDE_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(gg-core ${LIBCLANG_LIBRARIES} fmt mstch)
+
+add_executable(gmock-generator main.cpp)
 target_include_directories(gmock-generator PUBLIC ${CLANG_INCLUDE_DIRS} ${LLVM_INCLUDE_DIR} ${mstch_INCLUDE_DIR})
-target_link_libraries(gmock-generator cxxopts ${LIBCLANG_LIBRARIES} fmt mstch)
+target_link_libraries(gmock-generator cxxopts ${LIBCLANG_LIBRARIES} fmt mstch gg-core)
+
+enable_testing()
+add_subdirectory(tests)

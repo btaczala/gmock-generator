@@ -7,13 +7,20 @@
 #include <unordered_map>
 #include <vector>
 
+struct Arg {
+    std::string _type;
+};
+
 struct Method {
     std::string _name;
+    std::vector<Arg> _arguments;
+    std::string _returnType;
 };
 
 struct Class {
     std::string _name;
     std::vector<Method> _methods;
+    std::vector<Method> _ctors;
 };
 
 struct CXXFile {
@@ -21,14 +28,13 @@ struct CXXFile {
 };
 
 struct GMOCKGenerator {
-    using NamespaceCb = std::function<void(const std::string&)>;
-
     GMOCKGenerator(const std::string& filename);
     ~GMOCKGenerator();
 
     CXXFile parse();
 
    private:
+    using NamespaceCb = std::function<void(CXCursor)>;
     static CXChildVisitResult visit(CXCursor cursor, CXCursor parent,
                                     CXClientData thiz);
 
