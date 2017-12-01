@@ -1,4 +1,4 @@
-#include "generator.hpp"
+#include "clangparser.hpp"
 
 #include <fmt/format.h>
 #include <functional>
@@ -23,18 +23,26 @@ std::string getCursorKindName(CXCursorKind cursorKind) {
 std::string getCursorSpelling(CXCursor cursor) {
     return convert(cursor, clang_getCursorSpelling);
 }
+
+constexpr const char* defaultArguments[] = {"-std=c++14"};
+
 }  // namespace
 
-GMOCKGenerator::GMOCKGenerator(const std::string& filename)
+ClangParser::ClangParser(const std::string& filename)
     : _filename(filename),
       _index(clang_createIndex(0, 0)),
-      _unit(clang_parseTranslationUnit(_index, _filename.c_str(), nullptr, 0,
-                                       nullptr, 0, CXTranslationUnit_None)) {
+      _unit(clang_parseTranslationUnit(
+          _index, _filename.c_str(), defaultArguments,
+          std::extent<decltype(defaultArguments)>::value, nullptr, 0,
+          CXTranslationUnit_None)) {
     if (!_index || !_unit) {
         throw std::runtime_error(fmt::format("Unable to parse {}", _filename));
     }
 
     _cbs[CXCursor_ClassDecl] = [this](CXCursor cursor) {
+        _file._classes.push_back(Class{getCursorSpelling(cursor)});
+    };
+    _cbs[CXCursor_StructDecl] = [this](CXCursor cursor) {
         _file._classes.push_back(Class{getCursorSpelling(cursor)});
     };
 
@@ -65,35 +73,35 @@ GMOCKGenerator::GMOCKGenerator(const std::string& filename)
     };
 }
 
-GMOCKGenerator::~GMOCKGenerator() {
+ClangParser::~ClangParser() {
     clang_disposeTranslationUnit(_unit);
     clang_disposeIndex(_index);
 }
 
-CXXFile GMOCKGenerator::parse() {
+CXXFile ClangParser::parse() {
     auto cursor = clang_getTranslationUnitCursor(_unit);
-    clang_visitChildren(cursor, &GMOCKGenerator::visit, this);
+    clang_visitChildren(cursor, &ClangParser::visit, this);
 
     return _file;
 }
 
-/**/ CXChildVisitResult GMOCKGenerator::visit(CXCursor cursor, CXCursor parent,
-                                              CXClientData thiz) {
+/**/ CXChildVisitResult ClangParser::visit(CXCursor cursor, CXCursor parent,
+                                           CXClientData thiz) {
     CXSourceLocation location = clang_getCursorLocation(cursor);
     if (clang_Location_isFromMainFile(location) == 0)
         return CXChildVisit_Continue;
 
-    auto _thiz = reinterpret_cast<GMOCKGenerator*>(thiz);
+    auto _thiz = reinterpret_cast<ClangParser*>(thiz);
 
-    // std::cout << fmt::format("{} ({})",
-    // getCursorKindName(clang_getCursorKind(cursor)),
-    // getCursorSpelling(cursor))
-    //<< std::endl;
+    std::cout << fmt::format("{} ({})",
+                             getCursorKindName(clang_getCursorKind(cursor)),
+                             getCursorSpelling(cursor))
+              << std::endl;
     auto kind = clang_getCursorKind(cursor);
     if (_thiz->_cbs.find(kind) != _thiz->_cbs.end()) {
         _thiz->_cbs[kind](cursor);
     }
-    clang_visitChildren(cursor, &GMOCKGenerator::visit, _thiz);
+    clang_visitChildren(cursor, &ClangParser::visit, _thiz);
 
     return CXChildVisit_Continue;
 }

@@ -4,12 +4,13 @@
 #include <sstream>
 #include <string>
 
-#include "generator.hpp"
+#include "types.hpp"
 
 struct MockWriter {
-    MockWriter(const CXXFile& f) : _file(f) {}
+    MockWriter(const std::string& headerFile, const CXXFile& f);
     std::string render();
 
+    const std::string _headerFilePath;
     const CXXFile _file;
 };
 

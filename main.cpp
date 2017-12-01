@@ -1,7 +1,7 @@
 #include <cxxopts.hpp>
 
 #include "MockWriter.hpp"
-#include "generator.hpp"
+#include "clangparser.hpp"
 
 int main(int argc, char* argv[]) {
     using namespace cxxopts;
@@ -28,10 +28,10 @@ int main(int argc, char* argv[]) {
         for (const auto& inputFile : inputFiles) {
             std::cout << "Parsing " << inputFile << std::endl;
             CXIndex index = clang_createIndex(0, 0);
-            GMOCKGenerator gen{inputFile};
+            ClangParser gen{inputFile};
 
             auto file = gen.parse();
-            MockWriter mw{file};
+            MockWriter mw{inputFile, file};
 
             std::cout << "\n\n\n" << mw.render() << std::endl;
         }

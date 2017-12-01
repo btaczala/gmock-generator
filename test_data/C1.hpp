@@ -2,6 +2,7 @@
 #define C1_HPP
 
 #include <string>
+#include <memory>
 
 namespace n1 {
 
@@ -11,7 +12,7 @@ class C1 {
     virtual ~C1() {}
 
     void f0();
-    virtual void f1();
+    virtual std::shared_ptr<std::string> f1();
     virtual void f2(int, std::string) {}
 };
 
