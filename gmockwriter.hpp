@@ -7,8 +7,8 @@
 #include "config.hpp"
 #include "types.hpp"
 
-struct MockWriter {
-    MockWriter(const CXXFile& f);
+struct GMockWriter {
+    GMockWriter(const CXXFile& f);
     std::string render(const Config& cfg = Config{});
 
     const std::string _headerFilePath;

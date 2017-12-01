@@ -1,4 +1,4 @@
-#include "MockWriter.hpp"
+#include "gmockwriter.hpp"
 
 #include <fmt/format.h>
 #include <fmt/ostream.h>
@@ -31,9 +31,9 @@ std::ostream& operator<<(std::ostream& os, const std::vector<Arg>& args) {
     return os;
 }
 
-MockWriter::MockWriter(const CXXFile& cxxFile) : _file(cxxFile) {}
+GMockWriter::GMockWriter(const CXXFile& cxxFile) : _file(cxxFile) {}
 
-std::string MockWriter::render(const Config& cfg) {
+std::string GMockWriter::render(const Config& cfg) {
     auto classCtorsFormatter = [](const Class& cl) -> std::string {
         std::string buff;
 

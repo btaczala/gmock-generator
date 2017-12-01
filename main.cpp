@@ -1,6 +1,6 @@
 #include <cxxopts.hpp>
 
-#include "MockWriter.hpp"
+#include "gmockwriter.hpp"
 #include "clangparser.hpp"
 
 int main(int argc, char* argv[]) {
@@ -31,7 +31,7 @@ int main(int argc, char* argv[]) {
             CXIndex index = clang_createIndex(0, 0);
             ClangParser gen{inputFile};
 
-            MockWriter mw{gen.parse()};
+            GMockWriter mw{gen.parse()};
             if (res.count("o")) {
                 std::cout << mw.render() << std::endl;
             }
