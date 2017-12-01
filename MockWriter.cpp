@@ -4,16 +4,7 @@
 #include <fmt/ostream.h>
 #include <mstch/mstch.hpp>
 
-#include <experimental/filesystem>
-
 namespace {
-
-std::string absolute(const std::string& path) {
-    namespace fs = std::experimental::filesystem;
-
-    fs::path filePath{path};
-    return fs::canonical(filePath).string();
-}
 
 const auto kClassFormat =
     R"({preambule}
@@ -41,8 +32,7 @@ std::ostream& operator<<(std::ostream& os, const std::vector<Arg>& args) {
     return os;
 }
 
-MockWriter::MockWriter(const std::string& filename, const CXXFile& cxxFile)
-    : _headerFilePath(absolute(filename)), _file(cxxFile) {}
+MockWriter::MockWriter(const CXXFile& cxxFile) : _file(cxxFile) {}
 
 std::string MockWriter::render() {
     auto classCtorsFormatter = [](const Class& cl) -> std::string {
@@ -68,7 +58,7 @@ std::string MockWriter::render() {
         buff += fmt::format(
             kClassFormat, fmt::arg("preambule", ""),
             fmt::arg("class_name", _class._name + "Mock"),
-            fmt::arg("header_file", _headerFilePath),
+            fmt::arg("header_file", _file._filePath),
             fmt::arg("class_constructors", classCtorsFormatter(_class)),
             fmt::arg("class_methods", classImplFormatter(_class)));
     }

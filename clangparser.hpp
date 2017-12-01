@@ -1,7 +1,9 @@
 #ifndef CLANGPARSER_HPP_EI7CPHU1
 #define CLANGPARSER_HPP_EI7CPHU1
 
+#include <clang-c/CXCompilationDatabase.h>
 #include <clang-c/Index.h>
+
 #include <functional>
 #include <string>
 #include <unordered_map>
@@ -23,6 +25,8 @@ struct ClangParser {
     const std::string _filename;
     CXIndex _index;
     CXTranslationUnit _unit;
+    CXCompilationDatabase _compilationDatabase{nullptr};
+    CXCompileCommands _compileCommands{nullptr};
 
     std::unordered_map<CXCursorKind, NamespaceCb> _cbs;
     CXXFile _file;

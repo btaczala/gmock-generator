@@ -21,6 +21,7 @@ struct Class {
 };
 
 struct CXXFile {
+    std::string _filePath;
     std::vector<Class> _classes;
 };
 

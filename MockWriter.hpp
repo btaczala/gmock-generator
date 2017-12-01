@@ -7,7 +7,7 @@
 #include "types.hpp"
 
 struct MockWriter {
-    MockWriter(const std::string& headerFile, const CXXFile& f);
+    MockWriter(const CXXFile& f);
     std::string render();
 
     const std::string _headerFilePath;

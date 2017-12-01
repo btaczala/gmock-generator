@@ -1,11 +1,19 @@
 #include "clangparser.hpp"
 
 #include <fmt/format.h>
+#include <experimental/filesystem>
 #include <functional>
 #include <iostream>
 #include <stdexcept>
 
 namespace {
+
+std::string absolute(const std::string& path) {
+    namespace fs = std::experimental::filesystem;
+
+    fs::path filePath{path};
+    return fs::canonical(filePath).string();
+}
 
 template <typename T, typename Fn>
 std::string convert(T&& t, Fn&& f) {
@@ -26,18 +34,30 @@ std::string getCursorSpelling(CXCursor cursor) {
 
 constexpr const char* defaultArguments[] = {"-std=c++14"};
 
+CXTranslationUnit compile(CXIndex index, const std::string& filename,
+                          CXCompileCommand commands) {
+    return clang_parseTranslationUnit(
+        index, filename.c_str(), defaultArguments,
+        std::extent<decltype(defaultArguments)>::value, nullptr, 0,
+        CXTranslationUnit_None);
+}
+
 }  // namespace
 
 ClangParser::ClangParser(const std::string& filename)
-    : _filename(filename),
-      _index(clang_createIndex(0, 0)),
-      _unit(clang_parseTranslationUnit(
-          _index, _filename.c_str(), defaultArguments,
-          std::extent<decltype(defaultArguments)>::value, nullptr, 0,
-          CXTranslationUnit_None)) {
+    : _filename(absolute(filename)), _index(clang_createIndex(0, 0)) {
+    CXCompilationDatabase_Error error;
+    _compilationDatabase = clang_CompilationDatabase_fromDirectory(".", &error);
+    _compileCommands = clang_CompilationDatabase_getCompileCommands(
+        _compilationDatabase, _filename.c_str());
+
+    _unit = compile(_index, filename, nullptr);
+
     if (!_index || !_unit) {
         throw std::runtime_error(fmt::format("Unable to parse {}", _filename));
     }
+
+    _file._filePath = _filename;
 
     _cbs[CXCursor_ClassDecl] = [this](CXCursor cursor) {
         _file._classes.push_back(Class{getCursorSpelling(cursor)});
@@ -74,6 +94,9 @@ ClangParser::ClangParser(const std::string& filename)
 }
 
 ClangParser::~ClangParser() {
+    clang_CompileCommands_dispose(_compileCommands);
+    clang_CompilationDatabase_dispose(_compilationDatabase);
+
     clang_disposeTranslationUnit(_unit);
     clang_disposeIndex(_index);
 }
