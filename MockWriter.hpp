@@ -4,11 +4,12 @@
 #include <sstream>
 #include <string>
 
+#include "config.hpp"
 #include "types.hpp"
 
 struct MockWriter {
     MockWriter(const CXXFile& f);
-    std::string render();
+    std::string render(const Config& cfg = Config{});
 
     const std::string _headerFilePath;
     const CXXFile _file;

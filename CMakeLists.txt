@@ -10,7 +10,7 @@ find_package(LibClang REQUIRED)
 
 add_subdirectory(3rdParty)
 
-add_library(gg-core clangparser.cpp MockWriter.cpp)
+add_library(gg-core clangparser.cpp MockWriter.cpp config.cpp)
 target_include_directories(gg-core PUBLIC ${CLANG_INCLUDE_DIRS} ${LLVM_INCLUDE_DIR} ${mstch_INCLUDE_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(gg-core ${LIBCLANG_LIBRARIES} fmt mstch stdc++fs)
 

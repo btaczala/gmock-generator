@@ -5,24 +5,21 @@
 #include <mstch/mstch.hpp>
 
 namespace {
-const std::string kDefaultPreambule = R"(
-/* This file is generated, do not edit */
-)";
 
 const auto kClassFormat =
-    R"(#ifndef {class_name}__MOCK_HPP
-#define {class_name}__MOCK_HPP
+    R"(#ifndef {class_name}{ifdefSuffix}
+#define {class_name}{ifdefSuffix}
 {preambule}
 #include <gmock/gmock.h>
 #include "{header_file}"
 
-class {class_name}Mock : public {class_name} {{ 
+class {class_name}{class_mock_suffix} : public {class_name} {{ 
   public:
 {class_constructors}
 {class_methods} 
 }};
 
-#endif // {class_name}__MOCK_HPP)";
+#endif // {class_name}{ifdefSuffix})";
 }  // namespace
 
 std::ostream& operator<<(std::ostream& os, const std::vector<Arg>& args) {
@@ -36,13 +33,17 @@ std::ostream& operator<<(std::ostream& os, const std::vector<Arg>& args) {
 
 MockWriter::MockWriter(const CXXFile& cxxFile) : _file(cxxFile) {}
 
-std::string MockWriter::render() {
+std::string MockWriter::render(const Config& cfg) {
     auto classCtorsFormatter = [](const Class& cl) -> std::string {
         std::string buff;
 
         for (auto& ctor : cl._ctors) {
-            buff += fmt::format("    {}Mock({}) : {}() {{}}\n", cl._name,
-                                ctor._arguments, cl._name);
+            buff += fmt::format(
+                "    {class_name}{class_mock_suffix}({arguments}) : "
+                "{class_name}() {{}}\n",
+                fmt::arg("class_name", cl._name),
+                fmt::arg("arguments", ctor._arguments),
+                fmt::arg("class_mock_suffix", "Mock"));
         }
         return buff;
     };
@@ -65,9 +66,11 @@ std::string MockWriter::render() {
     std::string buff;
     for (const auto& _class : _file._classes) {
         buff += fmt::format(
-            kClassFormat, fmt::arg("preambule", kDefaultPreambule),
+            kClassFormat, fmt::arg("preambule", cfg.preambule()),
+            fmt::arg("class_mock_suffix", cfg.mockSuffix()),
             fmt::arg("class_name", _class._name),
             fmt::arg("header_file", _file._filePath),
+            fmt::arg("ifdefSuffix", cfg.ifdefSuffix()),
             fmt::arg("class_constructors", classCtorsFormatter(_class)),
             fmt::arg("class_methods", classImplFormatter(_class)));
     }
