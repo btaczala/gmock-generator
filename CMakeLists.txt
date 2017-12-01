@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.8)
 project(gmock-generator)
 
+option(GG_BUILD_TESTS "Build unit tests" OFF)
+
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD 14)
 
@@ -11,5 +13,7 @@ find_package(LibClang REQUIRED)
 add_subdirectory(3rdParty)
 add_subdirectory(src)
 
-enable_testing()
-add_subdirectory(tests)
+if(GG_BUILD_TESTS)
+    enable_testing()
+    add_subdirectory(tests)
+endif()
