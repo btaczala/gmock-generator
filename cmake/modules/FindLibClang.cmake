@@ -50,7 +50,13 @@ if (NOT LIBCLANG_LLVM_CONFIG_EXECUTABLE)
                 foreach(minor RANGE 9 0)
                     foreach(patch RANGE 9 0)
                         # message(STATUS "trying llvm-config llvm-config${major}${minor} in /usr/local/Cellar/llvm/${major}.${minor}.${patch}/bin")
-                        find_program(LIBCLANG_LLVM_CONFIG_EXECUTABLE NAMES llvm-config llvm-config${major}${minor} PATHS /usr/local/Cellar/llvm/${major}.${minor}.${patch}/bin)
+                        find_program(LIBCLANG_LLVM_CONFIG_EXECUTABLE 
+                            NAMES 
+                                llvm-config llvm-config${major}${minor} 
+                            PATHS 
+                                /usr/local/Cellar/llvm/${major}.${minor}.${patch}/bin
+                                ${LIBCLANG_ROOT_DIR}/bin
+                            )
                         if (LIBCLANG_LLVM_CONFIG_EXECUTABLE)
                             break()
                         endif ()

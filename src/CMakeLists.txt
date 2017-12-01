@@ -1,8 +1,25 @@
+
+add_library(fs INTERFACE)
+if (APPLE) 
+    find_package(Boost REQUIRED COMPONENTS filesystem)
+    target_link_libraries(fs INTERFACE ${Boost_LIBRARIES})
+    target_include_directories(fs INTERFACE ${Boost_INCLUDE_DIRS})
+    target_compile_definitions(fs INTERFACE BOOST_FS)
+else()
+    target_link_libraries(fs INTERFACE stdc++fs)
+    target_compile_definitions(fs INTERFACE STD_FS)
+endif()
+
 add_library(gg-core clangparser.cpp gmockwriter.cpp config.cpp)
 target_include_directories(gg-core PUBLIC ${CLANG_INCLUDE_DIRS} ${LLVM_INCLUDE_DIR} ${mstch_INCLUDE_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(gg-core ${LIBCLANG_LIBRARIES} fmt stdc++fs)
+target_link_libraries(gg-core ${LIBCLANG_LIBRARIES} fmt fs)
+if(APPLE)
+    set_target_properties(gg-core PROPERTIES COMPILE_FLAGS ${LIBCLANG_CXXFLAGS})
+endif()
 
 add_executable(gmock-generator main.cpp)
 target_include_directories(gmock-generator PUBLIC ${CLANG_INCLUDE_DIRS} ${LLVM_INCLUDE_DIR} ${mstch_INCLUDE_DIR})
 target_link_libraries(gmock-generator cxxopts ${LIBCLANG_LIBRARIES} gg-core)
-
+if(APPLE)
+    set_target_properties(gmock-generator PROPERTIES COMPILE_FLAGS ${LIBCLANG_CXXFLAGS})
+endif()

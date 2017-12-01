@@ -9,6 +9,7 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/modules)
 
 find_package(LibClang REQUIRED)
+message(STATUS ${LIBCLANG_CXXFLAGS})
 
 add_subdirectory(3rdParty)
 add_subdirectory(src)

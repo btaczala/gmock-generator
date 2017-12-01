@@ -2,7 +2,6 @@
 
 #include <fmt/format.h>
 #include <fmt/ostream.h>
-#include <mstch/mstch.hpp>
 
 namespace {
 

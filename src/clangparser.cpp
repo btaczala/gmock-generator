@@ -1,16 +1,15 @@
 #include "clangparser.hpp"
+#include "fs.hpp"
 
-#include <fmt/format.h>
-#include <experimental/filesystem>
 #include <functional>
 #include <iostream>
 #include <set>
 #include <stdexcept>
+#include <fmt/format.h>
 
 namespace {
 
 std::string absolute(const std::string& path) {
-    namespace fs = std::experimental::filesystem;
 
     fs::path filePath{path};
     return fs::canonical(filePath).string();
