@@ -15,6 +15,7 @@ add_subdirectory(3rdParty)
 add_subdirectory(src)
 
 if(GG_BUILD_TESTS)
+    add_subdirectory(3rdParty/gtest)
     enable_testing()
     add_subdirectory(tests)
 endif()

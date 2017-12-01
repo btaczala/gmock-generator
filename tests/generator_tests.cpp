@@ -1,8 +1,6 @@
 #include <gtest/gtest.h>
-#include <experimental/filesystem>
 #include "clangparser.hpp"
-
-namespace fs = std::experimental::filesystem;
+#include "fs.hpp"
 
 const std::string rootTestData = TEST_DIR;
 
