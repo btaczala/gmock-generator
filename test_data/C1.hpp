@@ -11,7 +11,7 @@ class C1 {
     explicit C1(int);
     virtual ~C1() {}
 
-    void f0();
+    void f0() const;
     virtual std::shared_ptr<std::string> f1();
     virtual void f2(int, std::string) {}
 };

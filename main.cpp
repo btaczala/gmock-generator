@@ -30,7 +30,8 @@ int main(int argc, char* argv[]) {
             CXIndex index = clang_createIndex(0, 0);
             ClangParser gen{inputFile};
 
-            std::cout << "\n\n\n" << MockWriter{gen.parse()}.render() << std::endl;
+            std::cout << "\n\n\n"
+                      << MockWriter{gen.parse()}.render() << std::endl;
         }
     } catch (const std::exception& ex) {
         std::cerr << ex.what() << std::endl;

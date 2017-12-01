@@ -8,13 +8,13 @@ namespace {
 
 const auto kClassFormat =
     R"({preambule}
-#ifdef {class_name}__MOCK_HPP
+#ifndef {class_name}__MOCK_HPP
 #define {class_name}__MOCK_HPP
 
 #include <gmock/gmock.h>
 #include "{header_file}"
 
-class {class_name} {{ 
+class {class_name}Mock {{ 
   public:
 {class_constructors}
 {class_methods} 
@@ -25,6 +25,7 @@ class {class_name} {{
 }  // namespace
 
 std::ostream& operator<<(std::ostream& os, const std::vector<Arg>& args) {
+    if (args.empty()) return os;
     std::for_each(args.begin(), args.end() - 1,
                   [&os](const auto& arg) { os << arg._type << ", "; });
 
@@ -47,8 +48,15 @@ std::string MockWriter::render() {
     auto classImplFormatter = [](const Class& cl) -> std::string {
         std::string buff;
         for (const auto& m : cl._methods) {
-            buff += fmt::format("    MOCK_METHOD{}({}, {});\n",
-                                m._arguments.size(), m._name, m._returnType);
+            if (m._const) {
+                buff += fmt::format("    MOCK_CONST_METHOD{}({}, {}({}));\n",
+                                    m._arguments.size(), m._name, m._returnType,
+                                    m._arguments);
+            } else {
+                buff += fmt::format("    MOCK_METHOD{}({}, {}({}));\n",
+                                    m._arguments.size(), m._name, m._returnType,
+                                    m._arguments);
+            }
         }
         return buff;
     };
@@ -57,7 +65,7 @@ std::string MockWriter::render() {
     for (const auto& _class : _file._classes) {
         buff += fmt::format(
             kClassFormat, fmt::arg("preambule", ""),
-            fmt::arg("class_name", _class._name + "Mock"),
+            fmt::arg("class_name", _class._name),
             fmt::arg("header_file", _file._filePath),
             fmt::arg("class_constructors", classCtorsFormatter(_class)),
             fmt::arg("class_methods", classImplFormatter(_class)));
