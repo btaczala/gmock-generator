@@ -1,7 +1,7 @@
 #include <cxxopts.hpp>
 
-#include "gmockwriter.hpp"
 #include "clangparser.hpp"
+#include "gmockwriter.hpp"
 
 int main(int argc, char* argv[]) {
     using namespace cxxopts;
