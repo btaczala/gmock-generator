@@ -189,10 +189,10 @@ CXXFile ClangParser::parse() {
 
     auto _thiz = reinterpret_cast<ClangParser*>(thiz);
 
-    std::cout << fmt::format("{} ({})",
-                             getCursorKindName(clang_getCursorKind(cursor)),
-                             getCursorSpelling(cursor))
-              << std::endl;
+    // std::cout << fmt::format("{} ({})",
+    // getCursorKindName(clang_getCursorKind(cursor)),
+    // getCursorSpelling(cursor))
+    //<< std::endl;
     auto kind = clang_getCursorKind(cursor);
     if (_thiz->_cbs.find(kind) != _thiz->_cbs.end()) {
         _thiz->_cbs[kind](cursor);

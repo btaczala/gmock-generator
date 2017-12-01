@@ -13,10 +13,12 @@ int main(int argc, char* argv[]) {
         // clang-format off
         opts.add_options()
             ("positional", "Input files",cxxopts::value<std::vector<std::string>>(inputFiles))
+            ("o,stdout", "Print generated gmock file on stdout")
             ("h,help", "Print this help")
             ;
         // clang-format on
 
+        opts.positional_help("header files");
         opts.parse_positional({"positional"});
         auto res = opts.parse(argc, argv);
 
@@ -26,12 +28,13 @@ int main(int argc, char* argv[]) {
         }
 
         for (const auto& inputFile : inputFiles) {
-            std::cout << "Parsing " << inputFile << std::endl;
             CXIndex index = clang_createIndex(0, 0);
             ClangParser gen{inputFile};
 
-            std::cout << "\n\n\n"
-                      << MockWriter{gen.parse()}.render() << std::endl;
+            MockWriter mw{gen.parse()};
+            if (res.count("o")) {
+                std::cout << mw.render() << std::endl;
+            }
         }
     } catch (const std::exception& ex) {
         std::cerr << ex.what() << std::endl;

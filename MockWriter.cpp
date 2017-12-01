@@ -5,23 +5,24 @@
 #include <mstch/mstch.hpp>
 
 namespace {
+const std::string kDefaultPreambule = R"(
+/* This file is generated, do not edit */
+)";
 
 const auto kClassFormat =
-    R"({preambule}
-#ifndef {class_name}__MOCK_HPP
+    R"(#ifndef {class_name}__MOCK_HPP
 #define {class_name}__MOCK_HPP
-
+{preambule}
 #include <gmock/gmock.h>
 #include "{header_file}"
 
-class {class_name}Mock {{ 
+class {class_name}Mock : public {class_name} {{ 
   public:
 {class_constructors}
 {class_methods} 
 }};
 
-#endif // {class_name}__MOCK_HPP
-)";
+#endif // {class_name}__MOCK_HPP)";
 }  // namespace
 
 std::ostream& operator<<(std::ostream& os, const std::vector<Arg>& args) {
@@ -64,11 +65,14 @@ std::string MockWriter::render() {
     std::string buff;
     for (const auto& _class : _file._classes) {
         buff += fmt::format(
-            kClassFormat, fmt::arg("preambule", ""),
+            kClassFormat, fmt::arg("preambule", kDefaultPreambule),
             fmt::arg("class_name", _class._name),
             fmt::arg("header_file", _file._filePath),
             fmt::arg("class_constructors", classCtorsFormatter(_class)),
             fmt::arg("class_methods", classImplFormatter(_class)));
     }
+    // buff.erase(std::unique(buff.begin(), buff.end(), [](auto c1, auto c2) {
+    // return c1 == '\n' && c2 == '\n';
+    //}));
     return buff;
 }
