@@ -4,12 +4,14 @@
 #include <sstream>
 #include <string>
 
-#include "generator.hpp"
+#include "config.hpp"
+#include "types.hpp"
 
-struct MockWriter {
-    MockWriter(const CXXFile& f) : _file(f) {}
-    std::string render();
+struct GMockWriter {
+    GMockWriter(const CXXFile& f);
+    std::string render(const Config& cfg = Config{});
 
+    const std::string _headerFilePath;
     const CXXFile _file;
 };
 
