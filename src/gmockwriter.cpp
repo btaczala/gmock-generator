@@ -2,6 +2,7 @@
 
 #include <fmt/format.h>
 #include <fmt/ostream.h>
+#include <algorithm>
 
 namespace {
 
@@ -19,14 +20,59 @@ class {class_name}{class_mock_suffix} : public {class_name} {{
 }};
 
 #endif // {class_name}{ifdefSuffix})";
+
+const auto kCtorFormat =
+    "    {class_name}{class_mock_suffix}({arguments}) : "
+    "{class_name}({ctor_args}) {{}}\n";
+
+const auto kMethodFormat =
+    "    MOCK_METHOD{number_of_args}({method_name}, "
+    "{return_type}({arguments}));\n";
+const auto kConstMethodFormat =
+    "    MOCK_CONST_METHOD{number_of_args}({method_name}, "
+    "{return_type}({arguments}));\n";
+
+std::string ctorArgs(const std::vector<Arg>& args) {
+    if (args.empty()) return "";
+
+    std::stringstream ss;
+    std::size_t counter{1};
+
+    std::for_each(args.begin(), args.end() - 1,
+                  [&ss, &counter](const Arg& arg) {
+                      if (arg._name.empty()) {
+                          ss << "arg" << counter++;
+                      }
+
+                      ss << ",";
+                  });
+    auto a = args.back();
+    if (a._name.empty()) {
+        ss << "arg" << counter++;
+    }
+
+    return ss.str();
+}
 }  // namespace
 
 std::ostream& operator<<(std::ostream& os, const std::vector<Arg>& args) {
     if (args.empty()) return os;
+    std::size_t counter{1};
     std::for_each(args.begin(), args.end() - 1,
-                  [&os](const auto& arg) { os << arg._type << ", "; });
+                  [&os, &counter](const auto& arg) {
+                      os << arg._type;
+                      if (arg._name.empty()) {
+                          os << " arg" << counter++;
+                      }
+                      os << ", ";
+                  });
 
-    os << args.back()._type;
+    auto& arg = args.back();
+    os << arg._type << " ";
+    if (arg._name.empty()) {
+        os << "arg" << counter;
+    }
+
     return os;
 }
 
@@ -37,12 +83,11 @@ std::string GMockWriter::render(const Config& cfg) {
         std::string buff;
 
         for (auto& ctor : cl._ctors) {
-            buff += fmt::format(
-                "    {class_name}{class_mock_suffix}({arguments}) : "
-                "{class_name}() {{}}\n",
-                fmt::arg("class_name", cl._name),
-                fmt::arg("arguments", ctor._arguments),
-                fmt::arg("class_mock_suffix", "Mock"));
+            buff +=
+                fmt::format(kCtorFormat, fmt::arg("class_name", cl._name),
+                            fmt::arg("arguments", ctor._arguments),
+                            fmt::arg("ctor_args", ctorArgs(ctor._arguments)),
+                            fmt::arg("class_mock_suffix", "Mock"));
         }
         return buff;
     };
@@ -50,13 +95,19 @@ std::string GMockWriter::render(const Config& cfg) {
         std::string buff;
         for (const auto& m : cl._methods) {
             if (m._const) {
-                buff += fmt::format("    MOCK_CONST_METHOD{}({}, {}({}));\n",
-                                    m._arguments.size(), m._name, m._returnType,
-                                    m._arguments);
+                buff +=
+                    fmt::format(kConstMethodFormat,
+                                fmt::arg("number_of_args", m._arguments.size()),
+                                fmt::arg("method_name", m._name),
+                                fmt::arg("return_type", m._returnType),
+                                fmt::arg("arguments", m._arguments));
             } else {
-                buff += fmt::format("    MOCK_METHOD{}({}, {}({}));\n",
-                                    m._arguments.size(), m._name, m._returnType,
-                                    m._arguments);
+                buff +=
+                    fmt::format(kMethodFormat,
+                                fmt::arg("number_of_args", m._arguments.size()),
+                                fmt::arg("method_name", m._name),
+                                fmt::arg("return_type", m._returnType),
+                                fmt::arg("arguments", m._arguments));
             }
         }
         return buff;
@@ -73,8 +124,5 @@ std::string GMockWriter::render(const Config& cfg) {
             fmt::arg("class_constructors", classCtorsFormatter(_class)),
             fmt::arg("class_methods", classImplFormatter(_class)));
     }
-    // buff.erase(std::unique(buff.begin(), buff.end(), [](auto c1, auto c2) {
-    // return c1 == '\n' && c2 == '\n';
-    //}));
     return buff;
 }

@@ -6,6 +6,7 @@
 
 struct Arg {
     std::string _type;
+    std::string _name;
 };
 
 struct Method {
