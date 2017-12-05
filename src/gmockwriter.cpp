@@ -114,7 +114,7 @@ std::string GMockWriter::render(const Config& cfg) {
     };
 
     std::string buff;
-    for (const auto& _class : _file._classes) {
+    for (const auto& _class : _file._namespaces.back()._classes) {
         buff += fmt::format(
             kClassFormat, fmt::arg("preambule", cfg.preambule()),
             fmt::arg("class_mock_suffix", cfg.mockSuffix()),

@@ -22,9 +22,14 @@ struct Class {
     std::vector<Method> _ctors;
 };
 
+struct Namespace {
+    std::string _name;
+    std::vector<Class> _classes;
+};
+
 struct CXXFile {
     std::string _filePath;
-    std::vector<Class> _classes;
+    std::vector<Namespace> _namespaces;
 };
 
 #endif /* end of include guard: TYPES_HPP_WLEIA01H */

@@ -1,16 +1,15 @@
 #include "clangparser.hpp"
 #include "fs.hpp"
 
+#include <fmt/format.h>
 #include <functional>
 #include <iostream>
 #include <set>
 #include <stdexcept>
-#include <fmt/format.h>
 
 namespace {
 
 std::string absolute(const std::string& path) {
-
     fs::path filePath{path};
     return fs::canonical(filePath).string();
 }
@@ -123,15 +122,25 @@ ClangParser::ClangParser(const std::string& filename)
 
     _file._filePath = _filename;
 
+    _cbs[CXCursor_Namespace] = [this](CXCursor cursor) {
+        _file._namespaces.push_back(Namespace{getCursorSpelling(cursor)});
+    };
+
     _cbs[CXCursor_ClassDecl] = [this](CXCursor cursor) {
-        _file._classes.push_back(Class{getCursorSpelling(cursor)});
+
+        if (_file._namespaces.empty()) {
+            _file._namespaces.push_back(Namespace{""});
+        }
+        _file._namespaces.back()._classes.push_back(
+            Class{getCursorSpelling(cursor)});
     };
     _cbs[CXCursor_StructDecl] = [this](CXCursor cursor) {
-        _file._classes.push_back(Class{getCursorSpelling(cursor)});
+        _file._namespaces.back()._classes.push_back(
+            Class{getCursorSpelling(cursor)});
     };
 
     _cbs[CXCursor_Constructor] = [this](CXCursor cursor) {
-        auto& cl = _file._classes.back();
+        auto& cl = _file._namespaces.back()._classes.back();
         Method m;
         m._name = getCursorSpelling(cursor);
         m._returnType = "";
@@ -147,7 +156,7 @@ ClangParser::ClangParser(const std::string& filename)
     };
 
     _cbs[CXCursor_CXXMethod] = [this](CXCursor cursor) {
-        auto& cl = _file._classes.back();
+        auto& cl = _file._namespaces.back()._classes.back();
 
         auto returnType = clang_getResultType(clang_getCursorType(cursor));
         Method m;
