@@ -19,22 +19,27 @@ TEST(Generator, c1_hpp) {
 
     auto parsed = gen.parse();
 
-    ASSERT_EQ(parsed._classes.size(), 1);
-    EXPECT_EQ(parsed._classes.at(0)._name, "C1");
+    ASSERT_EQ(parsed._namespaces.size(), 1);
+    ASSERT_EQ(parsed._namespaces.at(0)._classes.size(), 1);
 
-    ASSERT_EQ(parsed._classes.at(0)._ctors.size(), 1);
-    ASSERT_EQ(parsed._classes.at(0)._ctors.at(0)._arguments.size(), 1);
-    EXPECT_EQ(parsed._classes.at(0)._ctors.at(0)._arguments.at(0)._type, "int");
+    auto& _classes = parsed._namespaces.at(0)._classes;
+    auto& _class = _classes.at(0);
 
-    EXPECT_EQ(parsed._classes.at(0)._methods.size(), 3);
-    EXPECT_EQ(parsed._classes.at(0)._methods.at(0)._name, "f0");
-    EXPECT_EQ(parsed._classes.at(0)._methods.at(0)._const, true);
-    EXPECT_EQ(parsed._classes.at(0)._methods.at(0)._returnType, "void");
+    EXPECT_EQ(_class._name, "C1");
 
-    ASSERT_EQ(parsed._classes.at(0)._ctors.size(), 1);
-    EXPECT_EQ(parsed._classes.at(0)._ctors.at(0)._returnType, "");
-    ASSERT_EQ(parsed._classes.at(0)._ctors.at(0)._arguments.size(), 1);
-    EXPECT_EQ(parsed._classes.at(0)._ctors.at(0)._arguments.at(0)._type, "int");
+    ASSERT_EQ(_class._ctors.size(), 1);
+    ASSERT_EQ(_class._ctors.at(0)._arguments.size(), 1);
+    EXPECT_EQ(_class._ctors.at(0)._arguments.at(0)._type, "int");
+
+    EXPECT_EQ(_class._methods.size(), 3);
+    EXPECT_EQ(_class._methods.at(0)._name, "f0");
+    EXPECT_EQ(_class._methods.at(0)._const, true);
+    EXPECT_EQ(_class._methods.at(0)._returnType, "void");
+
+    ASSERT_EQ(_class._ctors.size(), 1);
+    EXPECT_EQ(_class._ctors.at(0)._returnType, "");
+    ASSERT_EQ(_class._ctors.at(0)._arguments.size(), 1);
+    EXPECT_EQ(_class._ctors.at(0)._arguments.at(0)._type, "int");
 }
 
 TEST(Generator, NotificationBackendInterface_hpp) {
@@ -43,12 +48,16 @@ TEST(Generator, NotificationBackendInterface_hpp) {
     ClangParser gen{testFilePath.string()};
 
     auto parsed = gen.parse();
+    ASSERT_EQ(parsed._namespaces.size(), 1);
+    ASSERT_EQ(parsed._namespaces.at(0)._classes.size(), 1);
 
-    ASSERT_EQ(parsed._classes.size(), 1);
-    EXPECT_EQ(parsed._classes.at(0)._name, "NotificationBackendInterface");
-    ASSERT_EQ(parsed._classes.at(0)._methods.size(), 1);
-    EXPECT_EQ(parsed._classes.at(0)._methods.at(0)._returnType, "void");
-    EXPECT_EQ(parsed._classes.at(0)._methods.at(0)._const, false);
+    auto& _classes = parsed._namespaces.at(0)._classes;
+    auto& _class = _classes.at(0);
+
+    EXPECT_EQ(_class._name, "NotificationBackendInterface");
+    ASSERT_EQ(_class._methods.size(), 1);
+    EXPECT_EQ(_class._methods.at(0)._returnType, "void");
+    EXPECT_EQ(_class._methods.at(0)._const, false);
 }
 
 int main(int argc, char* argv[]) {

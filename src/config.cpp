@@ -11,8 +11,26 @@ const std::string kDefaultMockSuffix = "Mock";
 
 Config::Config() {}
 
-std::string Config::preambule() const { return defaults::kDefaultPreambule; }
-std::string Config::mockSuffix() const { return defaults::kDefaultMockSuffix; }
+Config::Config(const std::string& preambule, const std::string& mockSuffix,
+               const std::string& ifdefSuffix)
+    : _preambule(preambule),
+      _mockSuffix(mockSuffix),
+      _ifdefSuffix(ifdefSuffix) {}
+
+std::string Config::preambule() const {
+    if (_preambule) {
+        return *_preambule;
+    } else {
+        return defaults::kDefaultPreambule;
+    }
+}
+std::string Config::mockSuffix() const {
+    if (_mockSuffix) {
+        return *_mockSuffix;
+    } else {
+        return defaults::kDefaultMockSuffix;
+    }
+};
 
 std::string Config::ifdefSuffix() const {
     std::string suffix = "__";

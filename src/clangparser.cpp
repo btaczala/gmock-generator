@@ -134,7 +134,11 @@ ClangParser::ClangParser(const std::string& filename)
         _file._namespaces.back()._classes.push_back(
             Class{getCursorSpelling(cursor)});
     };
+
     _cbs[CXCursor_StructDecl] = [this](CXCursor cursor) {
+        if (_file._namespaces.empty()) {
+            _file._namespaces.push_back(Namespace{""});
+        }
         _file._namespaces.back()._classes.push_back(
             Class{getCursorSpelling(cursor)});
     };

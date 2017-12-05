@@ -6,31 +6,44 @@
 
 namespace {
 
-const auto kClassFormat =
+const auto kFileFormat =
     R"(#ifndef {class_name}{ifdefSuffix}
 #define {class_name}{ifdefSuffix}
 {preambule}
 #include <gmock/gmock.h>
 #include "{header_file}"
 
-class {class_name}{class_mock_suffix} : public {class_name} {{ 
-  public:
-{class_constructors}
-{class_methods} 
-}};
+{namespaces}
+{classes}
+{namespaces_end}
 
-#endif // {class_name}{ifdefSuffix})";
+#endif // {class_name}{ifdefSuffix}
+)";
+
+const auto kClassFormat =
+    R"(class {class_name}{class_mock_suffix} : public {class_name} {{
+public :
+{class_constructors} 
+{class_methods}
+}};)";
+const auto kNamespaceFormat =
+    R"(namespace {namespace_name} {{
+)";
+
+const auto kEndNamespaceFormat =
+    R"(}} // namespace {namespace_name}
+)";
 
 const auto kCtorFormat =
-    "    {class_name}{class_mock_suffix}({arguments}) : "
-    "{class_name}({ctor_args}) {{}}\n";
+    R"(    {class_name}{class_mock_suffix}({arguments}) : {class_name}({ctor_args}) {{}}
+)";
 
 const auto kMethodFormat =
-    "    MOCK_METHOD{number_of_args}({method_name}, "
-    "{return_type}({arguments}));\n";
+    R"(    MOCK_METHOD{number_of_args}({method_name}, {return_type}({arguments}));
+)";
 const auto kConstMethodFormat =
-    "    MOCK_CONST_METHOD{number_of_args}({method_name}, "
-    "{return_type}({arguments}));\n";
+    R"(    MOCK_CONST_METHOD{number_of_args}({method_name}, {return_type}({arguments}));
+)";
 
 std::string ctorArgs(const std::vector<Arg>& args) {
     if (args.empty()) return "";
@@ -113,16 +126,36 @@ std::string GMockWriter::render(const Config& cfg) {
         return buff;
     };
 
-    std::string buff;
-    for (const auto& _class : _file._namespaces.back()._classes) {
-        buff += fmt::format(
-            kClassFormat, fmt::arg("preambule", cfg.preambule()),
-            fmt::arg("class_mock_suffix", cfg.mockSuffix()),
-            fmt::arg("class_name", _class._name),
-            fmt::arg("header_file", _file._filePath),
-            fmt::arg("ifdefSuffix", cfg.ifdefSuffix()),
-            fmt::arg("class_constructors", classCtorsFormatter(_class)),
-            fmt::arg("class_methods", classImplFormatter(_class)));
+    std::string classesText;
+
+    const auto& mainClass = _file._namespaces.back()._classes.at(0);
+
+    std::string nsBuffer;
+    std::string endNamespaceBuffer;
+    std::for_each(_file._namespaces.rbegin(), _file._namespaces.rend(),
+                  [&endNamespaceBuffer](const auto& ns) {
+                      endNamespaceBuffer +=
+                          fmt::format(kEndNamespaceFormat,
+                                      fmt::arg("namespace_name", ns._name));
+                  });
+    for (const auto& ns : _file._namespaces) {
+        nsBuffer +=
+            fmt::format(kNamespaceFormat, fmt::arg("namespace_name", ns._name));
+
+        for (const auto& clazz : ns._classes) {
+            classesText += fmt::format(
+                kClassFormat, fmt::arg("class_name", clazz._name),
+                fmt::arg("class_mock_suffix", cfg.mockSuffix()),
+                fmt::arg("class_constructors", classCtorsFormatter(clazz)),
+                fmt::arg("class_methods", classImplFormatter(clazz)));
+        }
     }
-    return buff;
+
+    return fmt::format(kFileFormat, fmt::arg("preambule", cfg.preambule()),
+                       fmt::arg("class_name", mainClass._name),
+                       fmt::arg("header_file", _file._filePath),
+                       fmt::arg("ifdefSuffix", cfg.ifdefSuffix()),
+                       fmt::arg("classes", classesText),
+                       fmt::arg("namespaces_end", endNamespaceBuffer),
+                       fmt::arg("namespaces", nsBuffer));
 }
