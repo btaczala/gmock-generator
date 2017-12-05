@@ -13,7 +13,7 @@ message(STATUS ${LIBCLANG_CXXFLAGS})
 
 if(GG_BUILD_TESTS)
     include(CodeCoverage)
-    set(COVERAGE_EXCLUDES '*/c++/*' '*/3rdParty/*' '*/tests/*')
+    set(COVERAGE_EXCLUDES '*/c++/*' '*/3rdParty/*' '*/tests/*' '*/main.cpp')
     append_coverage_compiler_flags()
 endif()
 
