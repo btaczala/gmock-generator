@@ -3,6 +3,7 @@
 #include <fmt/format.h>
 #include <fmt/ostream.h>
 #include <algorithm>
+#include <numeric>
 
 namespace {
 
@@ -23,7 +24,7 @@ const auto kFileFormat =
 const auto kClassFormat =
     R"(class {class_name}{class_mock_suffix} : public {class_name} {{
 public :
-{class_constructors} 
+{class_constructors}
 {class_methods}
 }};)";
 const auto kNamespaceFormat =
@@ -66,28 +67,60 @@ std::string ctorArgs(const std::vector<Arg>& args) {
 
     return ss.str();
 }
-}  // namespace
-
-std::ostream& operator<<(std::ostream& os, const std::vector<Arg>& args) {
-    if (args.empty()) return os;
+std::string argumentsTypeAndName(const std::vector<Arg>& args) {
+    std::stringstream os;
+    if (args.empty()) return os.str();
     std::size_t counter{1};
     std::for_each(args.begin(), args.end() - 1,
                   [&os, &counter](const auto& arg) {
                       os << arg._type;
-                      if (arg._name.empty()) {
-                          os << " arg" << counter++;
-                      }
+                      os << " arg" << counter++;
                       os << ", ";
                   });
 
     auto& arg = args.back();
-    os << arg._type << " ";
-    if (arg._name.empty()) {
-        os << "arg" << counter;
-    }
+    os << arg._type;
+    os << " arg" << counter;
 
-    return os;
+    return os.str();
 }
+
+std::string argumentsTypeOnly(const std::vector<Arg>& args) {
+    std::stringstream os;
+    if (args.empty()) return os.str();
+    std::size_t counter{1};
+    std::for_each(args.begin(), args.end() - 1,
+                  [&os, &counter](const auto& arg) {
+                      os << arg._type;
+                      os << ", ";
+                  });
+
+    auto& arg = args.back();
+    os << arg._type;
+
+    return os.str();
+}
+
+std::string removeWhiteLines(const std::string& data) {
+    std::vector<std::string> lines, result;
+    std::string line;
+
+    std::for_each(data.begin(), data.end(), [&lines, &line](char c) {
+        if (c == '\n') {
+            lines.push_back(line);
+            line = "";
+        }
+    });
+
+    result = lines;
+
+    std::string ret;
+    std::accumulate(result.begin(), result.end(), ret);
+
+    return ret;
+}
+
+}  // namespace
 
 GMockWriter::GMockWriter(const CXXFile& cxxFile) : _file(cxxFile) {}
 
@@ -96,11 +129,11 @@ std::string GMockWriter::render(const Config& cfg) {
         std::string buff;
 
         for (auto& ctor : cl._ctors) {
-            buff +=
-                fmt::format(kCtorFormat, fmt::arg("class_name", cl._name),
-                            fmt::arg("arguments", ctor._arguments),
-                            fmt::arg("ctor_args", ctorArgs(ctor._arguments)),
-                            fmt::arg("class_mock_suffix", "Mock"));
+            buff += fmt::format(
+                kCtorFormat, fmt::arg("class_name", cl._name),
+                fmt::arg("arguments", argumentsTypeAndName(ctor._arguments)),
+                fmt::arg("ctor_args", ctorArgs(ctor._arguments)),
+                fmt::arg("class_mock_suffix", "Mock"));
         }
         return buff;
     };
@@ -108,19 +141,19 @@ std::string GMockWriter::render(const Config& cfg) {
         std::string buff;
         for (const auto& m : cl._methods) {
             if (m._const) {
-                buff +=
-                    fmt::format(kConstMethodFormat,
-                                fmt::arg("number_of_args", m._arguments.size()),
-                                fmt::arg("method_name", m._name),
-                                fmt::arg("return_type", m._returnType),
-                                fmt::arg("arguments", m._arguments));
+                buff += fmt::format(
+                    kConstMethodFormat,
+                    fmt::arg("number_of_args", m._arguments.size()),
+                    fmt::arg("method_name", m._name),
+                    fmt::arg("return_type", m._returnType),
+                    fmt::arg("arguments", argumentsTypeOnly(m._arguments)));
             } else {
-                buff +=
-                    fmt::format(kMethodFormat,
-                                fmt::arg("number_of_args", m._arguments.size()),
-                                fmt::arg("method_name", m._name),
-                                fmt::arg("return_type", m._returnType),
-                                fmt::arg("arguments", m._arguments));
+                buff += fmt::format(
+                    kMethodFormat,
+                    fmt::arg("number_of_args", m._arguments.size()),
+                    fmt::arg("method_name", m._name),
+                    fmt::arg("return_type", m._returnType),
+                    fmt::arg("arguments", argumentsTypeOnly(m._arguments)));
             }
         }
         return buff;
@@ -134,13 +167,16 @@ std::string GMockWriter::render(const Config& cfg) {
     std::string endNamespaceBuffer;
     std::for_each(_file._namespaces.rbegin(), _file._namespaces.rend(),
                   [&endNamespaceBuffer](const auto& ns) {
-                      endNamespaceBuffer +=
-                          fmt::format(kEndNamespaceFormat,
-                                      fmt::arg("namespace_name", ns._name));
+                      if (!ns._name.empty()) {
+                          endNamespaceBuffer +=
+                              fmt::format(kEndNamespaceFormat,
+                                          fmt::arg("namespace_name", ns._name));
+                      }
                   });
     for (const auto& ns : _file._namespaces) {
-        nsBuffer +=
-            fmt::format(kNamespaceFormat, fmt::arg("namespace_name", ns._name));
+        if (!ns._name.empty())
+            nsBuffer += fmt::format(kNamespaceFormat,
+                                    fmt::arg("namespace_name", ns._name));
 
         for (const auto& clazz : ns._classes) {
             classesText += fmt::format(
