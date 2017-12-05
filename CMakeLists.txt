@@ -11,6 +11,12 @@ set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/modules)
 find_package(LibClang REQUIRED)
 message(STATUS ${LIBCLANG_CXXFLAGS})
 
+if(GG_BUILD_TESTS)
+    include(CodeCoverage)
+    set(COVERAGE_EXCLUDES '*/c++/*' '*/3rdParty/*' '*/tests/*')
+    append_coverage_compiler_flags()
+endif()
+
 add_subdirectory(3rdParty)
 add_subdirectory(src)
 
