@@ -9,8 +9,6 @@ const std::string kDefaultPreambule = R"(
 const std::string kDefaultMockSuffix = "Mock";
 }  // namespace defaults
 
-Config::Config() {}
-
 Config::Config(const std::string& preambule, const std::string& mockSuffix,
                const std::string& ifdefSuffix)
     : _preambule(preambule),

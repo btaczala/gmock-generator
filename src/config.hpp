@@ -5,7 +5,7 @@
 #include <string>
 
 struct Config {
-    Config();
+    Config() = default;
     Config(const std::string& preambule, const std::string& mockSuffix,
            const std::string& ifdefSuffix);
     std::string preambule() const;

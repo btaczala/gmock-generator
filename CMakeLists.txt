@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.8)
 project(gmock-generator)
 
 option(GG_BUILD_TESTS "Build unit tests" OFF)
+option(GG_ENABLE_TIDY "Enable clang-tidy" OFF)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD 17)

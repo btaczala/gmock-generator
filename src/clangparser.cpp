@@ -32,20 +32,23 @@ std::set<std::string> GetMethodQualifiers(CXTranslationUnit translationUnit,
     CXToken* tokens;
     unsigned int numTokens;
     clang_tokenize(translationUnit, range, &tokens, &numTokens);
+    std::vector<CXToken> vecTokens;
+
+    std::copy(tokens, tokens + numTokens, std::back_inserter(vecTokens));
 
     bool insideBrackets = false;
-    for (unsigned int i = 0; i < numTokens; i++) {
-        std::string token =
-            convert(clang_getTokenSpelling, translationUnit, tokens[i]);
-        if (token == "(") {
+    for (const auto& token : vecTokens) {
+        std::string tokenName =
+            convert(clang_getTokenSpelling, translationUnit, token);
+        if (tokenName == "(") {
             insideBrackets = true;
-        } else if (token == "{" || token == ";") {
+        } else if (tokenName == "{" || tokenName == ";") {
             break;
-        } else if (token == ")") {
+        } else if (tokenName == ")") {
             insideBrackets = false;
-        } else if (clang_getTokenKind(tokens[i]) == CXToken_Keyword &&
+        } else if (clang_getTokenKind(token) == CXToken_Keyword &&
                    !insideBrackets) {
-            qualifiers.insert(token);
+            qualifiers.insert(tokenName);
         }
     }
 
@@ -73,14 +76,14 @@ CXTranslationUnit compile(CXIndex index, const std::string& filename,
     if (numCompileCommands == 0) {
         tu = clang_parseTranslationUnit(
             index, filename.c_str(), defaultArguments,
-            std::extent<decltype(defaultArguments)>::value, 0, 0,
+            std::extent<decltype(defaultArguments)>::value, nullptr, 0,
             CXTranslationUnit_None);
 
     } else {
         CXCompileCommand compileCommand =
             clang_CompileCommands_getCommand(commands, 0);
         unsigned int numArguments = clang_CompileCommand_getNumArgs(commands);
-        char** arguments = new char*[numArguments];
+        auto arguments = new char*[numArguments];
 
         for (unsigned int i = 0; i < numArguments; i++) {
             CXString argument = clang_CompileCommand_getArg(compileCommand, i);
@@ -94,8 +97,8 @@ CXTranslationUnit compile(CXIndex index, const std::string& filename,
             clang_disposeString(argument);
         }
 
-        tu = clang_parseTranslationUnit(index, 0, arguments, numArguments, 0, 0,
-                                        CXTranslationUnit_None);
+        tu = clang_parseTranslationUnit(index, nullptr, arguments, numArguments,
+                                        nullptr, 0, CXTranslationUnit_None);
 
         for (unsigned int i = 0; i < numArguments; i++) delete[] arguments[i];
 
@@ -199,7 +202,7 @@ CXXFile ClangParser::parse() {
     if (clang_Location_isFromMainFile(location) == 0)
         return CXChildVisit_Continue;
 
-    auto _thiz = reinterpret_cast<ClangParser*>(thiz);
+    auto _thiz = static_cast<ClangParser*>(thiz);
 
     // std::cout << fmt::format("{} ({})",
     // getCursorKindName(clang_getCursorKind(cursor)),
