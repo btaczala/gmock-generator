@@ -16,8 +16,10 @@ if(APPLE)
 endif()
 gtest_add_tests(TARGET gmock_generator_tests SOURCES gmock_generator_tests.cpp)
 
-SETUP_TARGET_FOR_COVERAGE(
-    NAME coverage
-    EXECUTABLE ctest
-    DEPENDENCIES gmock_generator_tests generator_tests
-)
+if (NOT APPLE)
+    SETUP_TARGET_FOR_COVERAGE(
+        NAME coverage
+        EXECUTABLE ctest
+        DEPENDENCIES gmock_generator_tests generator_tests
+    )
+endif()
