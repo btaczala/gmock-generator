@@ -4,6 +4,7 @@
 
 #include "clangparser.hpp"
 #include "fs.hpp"
+#include "mockwriter.hpp"
 #include "gmockwriter.hpp"
 
 namespace {
@@ -47,7 +48,7 @@ int main(int argc, char* argv[]) {
             CXIndex index = clang_createIndex(0, 0);
             ClangParser gen{inputFile};
 
-            GMockWriter mw{gen.parse()};
+            MockWriter mw{gen.parse(), GMockImpl{}};
             if (res.count("o")) {
                 std::cout << mw.render() << std::endl;
             } else {

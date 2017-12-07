@@ -32,24 +32,26 @@ std::set<std::string> GetMethodQualifiers(CXTranslationUnit translationUnit,
     CXToken* tokens;
     unsigned int numTokens;
     clang_tokenize(translationUnit, range, &tokens, &numTokens);
+    std::vector<CXToken> vecTokens;
+    std::copy(tokens, tokens + numTokens, std::back_inserter(vecTokens));
+    clang_disposeTokens(translationUnit, tokens, numTokens);
 
     bool insideBrackets = false;
-    for (unsigned int i = 0; i < numTokens; i++) {
-        std::string token =
-            convert(clang_getTokenSpelling, translationUnit, tokens[i]);
+    for (const auto& tok : vecTokens) {
+        const std::string token =
+            convert(clang_getTokenSpelling, translationUnit, tok);
         if (token == "(") {
             insideBrackets = true;
         } else if (token == "{" || token == ";") {
             break;
         } else if (token == ")") {
             insideBrackets = false;
-        } else if (clang_getTokenKind(tokens[i]) == CXToken_Keyword &&
+        } else if (clang_getTokenKind(tok) == CXToken_Keyword &&
                    !insideBrackets) {
             qualifiers.insert(token);
         }
     }
 
-    clang_disposeTokens(translationUnit, tokens, numTokens);
     return qualifiers;
 }
 

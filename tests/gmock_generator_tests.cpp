@@ -7,6 +7,7 @@
 #include "fs.hpp"
 
 #include "gmockwriter.hpp"
+#include "mockwriter.hpp"
 
 const std::string rootTestData = TEST_DIR;
 
@@ -36,7 +37,7 @@ TEST_P(GmockGeneratorTest, MutlipleNamespaces) {
     fs::path expectedFile = fs::path{rootTestData} / "expected" / files.second;
     ClangParser p{testFilePath.string()};
 
-    GMockWriter gw{p.parse()};
+    MockWriter gw{p.parse(), GMockImpl {}};
 
     auto output = gw.render(cfg);
     EXPECT_EQ(output, readFile(expectedFile));
