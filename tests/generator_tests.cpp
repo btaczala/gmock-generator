@@ -64,3 +64,9 @@ int main(int argc, char* argv[]) {
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
 }
+
+TEST(Generator, missing_include_file) {
+    const fs::path testFilePath = fs::path{rootTestData} / "MissingInclude.hpp";
+
+    EXPECT_THROW(ClangParser{testFilePath.string()}, std::runtime_error);
+}

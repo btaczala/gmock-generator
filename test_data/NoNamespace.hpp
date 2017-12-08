@@ -2,7 +2,7 @@
 #define NONAMESPACE_HPP_DL8ND9JQ
 
 class NoNamespace {
-    virtual ~NoNamespce();
+    virtual ~NoNamespace() = default;
     virtual void foo() const noexcept;
 };
 

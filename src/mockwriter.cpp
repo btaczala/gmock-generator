@@ -105,6 +105,10 @@ std::string argumentsTypeOnly(const std::vector<Arg>& args) {
 
 
 std::string MockWriter::render(const Config& cfg) {
+
+    if (_file._namespaces.empty()) 
+        throw std::runtime_error(fmt::format("Can't parse {}", _file._filePath));
+
     auto classCtorsFormatter = [](const Class& cl) -> std::string {
         std::string buff;
 

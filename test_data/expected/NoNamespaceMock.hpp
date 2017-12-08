@@ -4,7 +4,7 @@
 /* This file is generated, do not edit */
 
 #include <gmock/gmock.h>
-#include "/home/bata/Projects/gmock-generator/test_data/NoNamespace.hpp"
+// SKIP #include "/home/bata/Projects/gmock-generator/test_data/NoNamespace.hpp"
 
 
 class NoNamespaceMock : public NoNamespace {

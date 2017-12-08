@@ -59,7 +59,7 @@ bool compareTwoStringsWithSpecial(const std::string& lhs,
                   [&equal, &rightIter](const std::string& line) {
                       auto rightLine = *rightIter;
 
-                      if (line.find("// SKIP") == std::string::npos ||
+                      if (line.find("// SKIP") == std::string::npos &&
                           rightLine.find("// SKIP") == std::string::npos) {
                           if (line != rightLine) {
                               equal = false;
@@ -81,7 +81,7 @@ TEST_P(GmockGeneratorTest, MutlipleNamespaces) {
     fs::path expectedFile = fs::path{rootTestData} / "expected" / files.second;
     ClangParser p{testFilePath.string()};
 
-    MockWriter gw{p.parse(), GMockImpl {}};
+    MockWriter gw{p.parse(), GMockImpl{}};
 
     auto output = gw.render(cfg);
     const bool bValue =

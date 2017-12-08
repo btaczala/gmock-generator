@@ -9,6 +9,10 @@
 
 namespace {
 
+// TODO: Fix this shit
+constexpr const char* defaultArguments[] = {"-std=c++14", "-x", "c++",
+                                            "-I/usr/lib/clang/5.0.0/include/"};
+
 std::string absolute(const std::string& path) {
     fs::path filePath{path};
     return fs::canonical(filePath).string();
@@ -62,8 +66,6 @@ std::string getCursorKindName(CXCursorKind cursorKind) {
 std::string getCursorSpelling(CXCursor cursor) {
     return convert(clang_getCursorSpelling, cursor);
 }
-
-constexpr const char* defaultArguments[] = {"-std=c++14"};
 
 /// stolen from:
 /// http://bastian.rieck.ru/blog/posts/2016/baby_steps_libclang_function_extents/
@@ -119,7 +121,23 @@ ClangParser::ClangParser(const std::string& filename)
     _unit = compile(_index, filename, nullptr);
 
     if (!_index || !_unit) {
-        throw std::runtime_error(fmt::format("Unable to parse {}", _filename));
+        throw std::runtime_error(
+            fmt::format("Unable to parse {} index={}, unit={}", _filename,
+                        _index, static_cast<void*>(_unit)));
+    }
+
+    {
+        auto nDiags = clang_getNumDiagnostics(_unit);
+
+        if (nDiags != 0) {
+            auto diags = clang_getDiagnostic(_unit, 0);
+
+            throw std::runtime_error(fmt::format(
+                "Unable to parse {}, diagnostics = {}\n {}", _filename,
+                convert(clang_getDiagnosticCategoryText, diags),
+                convert(clang_formatDiagnostic, diags,
+                        clang_defaultDiagnosticDisplayOptions())));
+        }
     }
 
     _file._filePath = _filename;
