@@ -93,6 +93,7 @@ INSTANTIATE_TEST_CASE_P(
     Mocks, GmockGeneratorTest,
     ::testing::Values(
         std::make_pair("MultipleNamespaces.hpp", "MultipleNamespacesMock.hpp"),
+        std::make_pair("C1.hpp", "C1Mock.hpp"),
         std::make_pair("NoNamespace.hpp", "NoNamespaceMock.hpp")));
 
 int main(int argc, char* argv[]) {
