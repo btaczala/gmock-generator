@@ -4,8 +4,8 @@
 
 #include "clangparser.hpp"
 #include "fs.hpp"
-#include "mockwriter.hpp"
 #include "gmockwriter.hpp"
+#include "mockwriter.hpp"
 
 namespace {
 void writeFile(const fs::path& path, const std::string& data) {
