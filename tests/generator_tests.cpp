@@ -68,5 +68,6 @@ int main(int argc, char* argv[]) {
 TEST(Generator, missing_include_file) {
     const fs::path testFilePath = fs::path{rootTestData} / "MissingInclude.hpp";
 
-    EXPECT_THROW(ClangParser{testFilePath.string()}, std::runtime_error);
+    auto fn = [&]() { ClangParser{testFilePath.string(), true}; };
+    EXPECT_THROW(fn(), std::runtime_error);
 }

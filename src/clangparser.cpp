@@ -111,8 +111,10 @@ CXTranslationUnit compile(CXIndex index, const std::string& filename,
 
 }  // namespace
 
-ClangParser::ClangParser(const std::string& filename)
-    : _filename(absolute(filename)), _index(clang_createIndex(0, 0)) {
+ClangParser::ClangParser(const std::string& filename, bool strictMode)
+    : _filename(absolute(filename)),
+      _strictMode(strictMode),
+      _index(clang_createIndex(0, 0)) {
     CXCompilationDatabase_Error error;
     _compilationDatabase = clang_CompilationDatabase_fromDirectory(".", &error);
     _compileCommands = clang_CompilationDatabase_getCompileCommands(
@@ -126,7 +128,7 @@ ClangParser::ClangParser(const std::string& filename)
                         _index, static_cast<void*>(_unit)));
     }
 
-    {
+    if (_strictMode) {
         auto nDiags = clang_getNumDiagnostics(_unit);
 
         if (nDiags != 0) {

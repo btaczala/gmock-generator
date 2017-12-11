@@ -30,6 +30,7 @@ int main(int argc, char* argv[]) {
         opts.add_options()
             ("positional", "Input files",cxxopts::value(inputFiles))
             ("o,stdout", "Print generated gmock file on stdout")
+            ("s,strict", "Use strict mode")
             ("d,directory", "Directory where to store generated gmock", cxxopts::value(outputDirectory)->default_value(fs::current_path().string()))
             ("h,help", "Print this help")
             ;

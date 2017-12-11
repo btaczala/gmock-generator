@@ -12,7 +12,7 @@
 #include "types.hpp"
 
 struct ClangParser {
-    ClangParser(const std::string& filename);
+    ClangParser(const std::string& filename, bool strictMode = false);
     ~ClangParser();
 
     CXXFile parse();
@@ -23,6 +23,7 @@ struct ClangParser {
                                     CXClientData thiz);
 
     const std::string _filename;
+    const bool _strictMode;
     CXIndex _index;
     CXTranslationUnit _unit;
     CXCompilationDatabase _compilationDatabase{nullptr};
