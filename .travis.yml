@@ -19,8 +19,8 @@ before_install:
   - docker pull bartekt/ubuntu-clang-cmake
 
 script:
-  - export CC=gcc CXX=g++
+  - export CC=gcc CXX=g++ GG_BUILD_TESTS=ON
   - ./scripts/docker_run.sh
-  - export CC=clang CXX=clang++
+  - export CC=clang CXX=clang++ GG_BUILD_TESTS=OFF
   - ./scripts/docker_run.sh
 
