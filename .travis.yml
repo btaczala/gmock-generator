@@ -1,0 +1,28 @@
+sudo: required
+language: cpp
+dist: trusty
+group: edge
+
+notifications:
+  email: false
+
+services:
+  docker
+
+# Blacklist
+branches:
+  except:
+    - gh-pages
+
+before_install:
+  - env
+  #- echo refs/heads/$TRAVIS_BRANCH~ refs/heads/$TRAVIS_BRANCH refs/heads/$TRAVIS_BRANCH | ./.trigger_appveyor.rb || true
+  - docker pull bartekt/ubuntu-clang-cmake
+  #- export ci_env=`bash <(curl -s https://codecov.io/env)`
+
+script:
+  - export CC=gcc-53 CXX=g++-53
+  - ./scripts/docker_run.sh
+  - export CC=clang CXX=clang++
+  - ./scripts/docker_run.sh
+

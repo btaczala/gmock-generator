@@ -1,4 +1,3 @@
 #!/bin/bash
 
-#docker pull uilianries/docker-clang:latest
-docker pull ubuntu
+docker pull bartekt/ubuntu-clang-cmake:latest
