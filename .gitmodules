@@ -4,9 +4,6 @@
 [submodule "3rdParty/fmt"]
 	path = 3rdParty/fmt
 	url = https://github.com/fmtlib/fmt.git
-[submodule "3rdParty/mstch"]
-	path = 3rdParty/mstch
-	url = https://github.com/no1msd/mstch.git
 [submodule "3rdParty/gtest"]
 	path = 3rdParty/gtest
 	url = https://github.com/google/googletest.git
