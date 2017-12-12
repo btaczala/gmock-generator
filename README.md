@@ -1,3 +1,8 @@
+
+
+Linux: [![Build Status](https://travis-ci.org/w0land/gmock-generator.svg?branch=master)](https://travis-ci.org/w0land/gmock-generator) <br />
+
+
 **Google Mock** mocks generator based on libclang
 
 ### Requirements
