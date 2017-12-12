@@ -1,0 +1,26 @@
+sudo: required
+language: cpp
+dist: trusty
+group: edge
+
+notifications:
+  email: false
+
+services:
+  docker
+
+# Blacklist
+branches:
+  except:
+    - gh-pages
+
+before_install:
+  - env
+  - docker pull bartekt/ubuntu-clang-cmake
+
+script:
+  - export CC=gcc CXX=g++
+  - ./scripts/docker_run.sh
+  - export CC=clang CXX=clang++
+  - ./scripts/docker_run.sh
+
