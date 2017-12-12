@@ -48,7 +48,7 @@ int main(int argc, char* argv[]) {
 
         for (const auto& inputFile : inputFiles) {
             CXIndex index = clang_createIndex(0, 0);
-            ClangParserOptions opts{0x0};
+            ClangParserOptions opts;
             if (res.count("hacks")) {
                 opts |= ClangParserOptions::UniquePtrHack;
             }
