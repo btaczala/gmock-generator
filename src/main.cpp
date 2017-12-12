@@ -31,6 +31,7 @@ int main(int argc, char* argv[]) {
             ("positional", "Input files",cxxopts::value(inputFiles))
             ("o,stdout", "Print generated gmock file on stdout")
             ("s,strict", "Use strict mode")
+            ("hacks", "include hacks")
             ("d,directory", "Directory where to store generated gmock", cxxopts::value(outputDirectory)->default_value(fs::current_path().string()))
             ("h,help", "Print this help")
             ;
@@ -47,7 +48,11 @@ int main(int argc, char* argv[]) {
 
         for (const auto& inputFile : inputFiles) {
             CXIndex index = clang_createIndex(0, 0);
-            ClangParser gen{inputFile};
+            ClangParserOptions opts{0x0};
+            if (res.count("hacks")) {
+                opts |= ClangParserOptions::UniquePtrHack;
+            }
+            ClangParser gen{inputFile, opts};
 
             MockWriter mw{gen.parse(), GMockImpl{}};
             if (res.count("o")) {

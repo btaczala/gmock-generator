@@ -197,6 +197,17 @@ ClangParser::ClangParser(const std::string& filename,
         }
         auto s = GetMethodQualifiers(_unit, cursor);
         m._const = (s.find("const") != s.end());
+
+        if ((m._returnType.find("std::unique_ptr") != std::string::npos) &&
+            (_options & ClangParserOptions::UniquePtrHack)) {
+            m._hasProxy = true;
+            Method proxyMethod = m;
+            proxyMethod._name += "Proxy";
+            proxyMethod._hasProxy = false;
+            proxyMethod._returnType = "std::string*";
+            cl._methods.push_back(proxyMethod);
+        }
+
         cl._methods.push_back(m);
     };
 }

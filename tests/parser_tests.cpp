@@ -10,7 +10,7 @@ bool contains(T&& t, V&& v) {
 
 const std::string rootTestData = TEST_DIR;
 
-TEST(ClangParser, parse) {
+TEST(ClangParser, c1) {
     fs::path testFilePath = fs::path{rootTestData} / "C1.hpp";
 
     ClangParser parser{testFilePath.string()};
@@ -28,6 +28,21 @@ TEST(ClangParser, parse) {
                    [](const auto& method) { return method._returnType; });
 
     EXPECT_TRUE(contains(returnTypes, "std::shared_ptr<std::string>"));
+}
+
+TEST(ClangParser, unique_ptr_hack) {
+    fs::path testFilePath = fs::path{rootTestData} / "UniquePtr.hpp";
+
+    ClangParser parser{testFilePath.string(),
+                       ClangParserOptions::UniquePtrHack};
+
+    const auto file = parser.parse();
+    ASSERT_EQ(file._namespaces.size(), 1);
+    EXPECT_EQ(file._namespaces.at(0)._classes.size(), 1);
+    EXPECT_EQ(file._namespaces.at(0)._classes.at(0)._methods.size(), 2);
+    EXPECT_FALSE(
+        file._namespaces.at(0)._classes.at(0)._methods.at(0)._hasProxy);
+    EXPECT_TRUE(file._namespaces.at(0)._classes.at(0)._methods.at(1)._hasProxy);
 }
 
 int main(int argc, char* argv[]) {
