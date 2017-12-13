@@ -13,8 +13,8 @@ struct Method {
     std::string _name;
     std::vector<Arg> _arguments;
     std::string _returnType;
-    bool _const;
-    bool _hasProxy;
+    bool _const{false};
+    bool _hasProxy{false};
 };
 
 struct Class {
