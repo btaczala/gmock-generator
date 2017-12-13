@@ -111,9 +111,10 @@ CXTranslationUnit compile(CXIndex index, const std::string& filename,
 
 }  // namespace
 
-ClangParser::ClangParser(const std::string& filename, bool strictMode)
+ClangParser::ClangParser(const std::string& filename,
+                         ClangParserOptions options)
     : _filename(absolute(filename)),
-      _strictMode(strictMode),
+      _options(options),
       _index(clang_createIndex(0, 0)) {
     CXCompilationDatabase_Error error;
     _compilationDatabase = clang_CompilationDatabase_fromDirectory(".", &error);
@@ -128,7 +129,7 @@ ClangParser::ClangParser(const std::string& filename, bool strictMode)
                         _index, static_cast<void*>(_unit)));
     }
 
-    if (_strictMode) {
+    if (_options & ClangParserOptions::StrictMode) {
         auto nDiags = clang_getNumDiagnostics(_unit);
 
         if (nDiags != 0) {
@@ -196,6 +197,17 @@ ClangParser::ClangParser(const std::string& filename, bool strictMode)
         }
         auto s = GetMethodQualifiers(_unit, cursor);
         m._const = (s.find("const") != s.end());
+
+        if ((m._returnType.find("std::unique_ptr") != std::string::npos) &&
+            (_options & ClangParserOptions::UniquePtrHack)) {
+            m._hasProxy = true;
+            Method proxyMethod = m;
+            proxyMethod._name += "Proxy";
+            proxyMethod._hasProxy = false;
+            proxyMethod._returnType = "std::string*";
+            cl._methods.push_back(proxyMethod);
+        }
+
         cl._methods.push_back(m);
     };
 }

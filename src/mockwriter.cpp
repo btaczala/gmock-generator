@@ -42,6 +42,11 @@ const auto kCtorFormat =
 const auto kMethodFormat =
     R"(    MOCK_METHOD{number_of_args}({method_name}, {return_type}({arguments}));
 )";
+const auto kProxyMethodFormat =
+    R"(    virtual {return_type} {method_name} ({arguments}) override {{
+        return {return_type}({method_name}Proxy({arguments}));
+    }};
+)";
 const auto kConstMethodFormat =
     R"(    MOCK_CONST_METHOD{number_of_args}({method_name}, {return_type}({arguments}));
 )";
@@ -103,11 +108,10 @@ std::string argumentsTypeOnly(const std::vector<Arg>& args) {
 
 }  // namespace
 
-
 std::string MockWriter::render(const Config& cfg) {
-
-    if (_file._namespaces.empty()) 
-        throw std::runtime_error(fmt::format("Can't parse {}", _file._filePath));
+    if (_file._namespaces.empty())
+        throw std::runtime_error(
+            fmt::format("Can't parse {}", _file._filePath));
 
     auto classCtorsFormatter = [](const Class& cl) -> std::string {
         std::string buff;
@@ -124,16 +128,25 @@ std::string MockWriter::render(const Config& cfg) {
     auto classImplFormatter = [](const Class& cl) -> std::string {
         std::string buff;
         for (const auto& m : cl._methods) {
-            if (m._const) {
-                buff += fmt::format(
-                    kConstMethodFormat,
-                    fmt::arg("number_of_args", m._arguments.size()),
-                    fmt::arg("method_name", m._name),
-                    fmt::arg("return_type", m._returnType),
-                    fmt::arg("arguments", argumentsTypeOnly(m._arguments)));
+            if (!m._hasProxy) {
+                if (m._const) {
+                    buff += fmt::format(
+                        kConstMethodFormat,
+                        fmt::arg("number_of_args", m._arguments.size()),
+                        fmt::arg("method_name", m._name),
+                        fmt::arg("return_type", m._returnType),
+                        fmt::arg("arguments", argumentsTypeOnly(m._arguments)));
+                } else {
+                    buff += fmt::format(
+                        kMethodFormat,
+                        fmt::arg("number_of_args", m._arguments.size()),
+                        fmt::arg("method_name", m._name),
+                        fmt::arg("return_type", m._returnType),
+                        fmt::arg("arguments", argumentsTypeOnly(m._arguments)));
+                }
             } else {
                 buff += fmt::format(
-                    kMethodFormat,
+                    kProxyMethodFormat,
                     fmt::arg("number_of_args", m._arguments.size()),
                     fmt::arg("method_name", m._name),
                     fmt::arg("return_type", m._returnType),

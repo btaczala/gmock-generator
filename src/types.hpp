@@ -14,6 +14,7 @@ struct Method {
     std::vector<Arg> _arguments;
     std::string _returnType;
     bool _const;
+    bool _hasProxy;
 };
 
 struct Class {

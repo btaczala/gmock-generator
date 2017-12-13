@@ -9,10 +9,12 @@
 #include <unordered_map>
 #include <vector>
 
+#include "clangparseroptions.hpp"
 #include "types.hpp"
 
 struct ClangParser {
-    ClangParser(const std::string& filename, bool strictMode = false);
+    ClangParser(const std::string& filename,
+                ClangParserOptions options = ClangParserOptions{});
     ~ClangParser();
 
     CXXFile parse();
@@ -23,7 +25,7 @@ struct ClangParser {
                                     CXClientData thiz);
 
     const std::string _filename;
-    const bool _strictMode;
+    ClangParserOptions _options;
     CXIndex _index;
     CXTranslationUnit _unit;
     CXCompilationDatabase _compilationDatabase{nullptr};
