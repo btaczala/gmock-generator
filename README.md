@@ -2,10 +2,11 @@
 
 Linux: [![Build Status](https://travis-ci.org/w0land/gmock-generator.svg?branch=master)](https://travis-ci.org/w0land/gmock-generator) <br />
 
+Mocks generator based on libclang. 
 
-**Google Mock** mocks generator based on libclang
+It can generate mocks based on Google Mocka and Trompeloeil. 
 
-### Requirements
+## Requirements
  + c++14 compiler (clang, gcc)
  + [libclang](http://clang.llvm.org) (tested with 3.9)
 
@@ -20,25 +21,38 @@ cd gmock-generator
 mkdir build && cmake .. && make
 ```
 
-### Usage
+## Usage
 
 ```sh
-$ ./gmock-generator --help
-mock files from interface
+Generates mock files from interface
 Usage:
-  ./gmock-generator [OPTION...] header files
+  ./src/mock-generator [OPTION...] header files
 
-  -o, --stdout  Print generated gmock file on stdout
-  -h, --help    Print this help
+  -o, --stdout         Print generated gmock file on stdout
+  -s, --strict         Use strict mode
+      --hacks          include hacks
+  -d, --directory arg  Directory where to store generated gmock (default: $PWD)
+  -h, --help           Print this help
 
 ```
 
+### Strict Mode
 
-### Example
+### hacks
+
+### Examples
 ```sh
 ./gmock-generator file.hpp
 ```
 
-### License
+```sh
+./gmock-generator --strict --hacks -d mocks/ file.hpp
+```
+
+```sh
+./gmock-generator --strict --hacks -d mocks/ file.hpp file2.hpp file3.hpp
+```
+
+## License
 Distributed under the [Boost Software License, Version 1.0](http://www.boost.org/LICENSE_1_0.txt).
 
